@@ -256,9 +256,9 @@ class Game {
 			return 5;
 		}
 		if (cardsInHand[0] - cardsInHand[4] == 4
-				&& cardsInHand[0] != cardsInHand[1]
-				&& cardsInHand[1] != cardsInHand[2]
-				&& cardsInHand[2] != cardsInHand[3]) {
+				&& cardsInHand[0] == cardsInHand[1]+1
+				&& cardsInHand[1] == cardsInHand[2]+1
+				&& cardsInHand[2] == cardsInHand[3]+1) {
 			return 4;
 		}
 		if (cardsInHand[0] == cardsInHand[2]
