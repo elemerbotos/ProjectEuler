@@ -32,37 +32,40 @@ public class Problem54 {
 			Card[] cardsPlayer1 = new Card[5];
 			Card[] cardsPlayer2 = new Card[5];
 			String[] cards = line.split(" ");
-			//System.out.println("PLAYER BEGIN");
 			for (int i = 0; i < 5; ++i) {
 				cardsPlayer1[i] = new Card();
 				cardsPlayer1[i].color = getColor(cards[i].charAt(1));
 				cardsPlayer1[i].number = getNumber(cards[i].charAt(0));
-				//System.out.print(cardsPlayer1[i].number + "-"
-				//		+ cardsPlayer1[i].color + " ");
+				//System.out.print(cardsPlayer1[i].number + " ");
 			}
 			//System.out.println("");
 			for (int i = 0; i < 5; ++i) {
 				cardsPlayer2[i] = new Card();
 				cardsPlayer2[i].color = getColor(cards[i + 5].charAt(1));
 				cardsPlayer2[i].number = getNumber(cards[i + 5].charAt(0));
-				//System.out.print(cardsPlayer2[i].number + "-"
-				//		+ cardsPlayer2[i].color + " ");
+				//System.out.print(cardsPlayer2[i].number + " ");
 			}
-			//System.out.println("\nPLAYER END");
+			//System.out.println("");
 			byte res = pokerGame.new_cards(cardsPlayer1, cardsPlayer2);
-			if (res == -1) {
-				System.out.println("Could not decide! ");
-			}
+
 			if (res == 1) {
 				++player1;
+				//System.out.println("Player1 won");
 			} else if (res == 2) {
 				++player2;
+				//System.out.println("Player2 won");
+			} else {
+				throw new IllegalArgumentException("Could not decide! " + res);
 			}
-
+			/*try {
+				System.in.read();
+			} catch (IOException e) {
+				System.out.println("Exception");
+			}*/
 		}
 
-		System.out.println("player1 won: " + player1 + "matches");
-		System.out.println("player2 won: " + player2 + "matches");
+		System.out.println("player1 won: " + player1 + " matche(s)");
+		System.out.println("player2 won: " + player2 + " matche(s)");
 	}
 
 	private static Byte getNumber(char charAt) {
@@ -109,17 +112,17 @@ class Game {
 	static final byte PLAYER_1 = 1;
 	static final byte PLAYER_2 = 2;
 
-	byte fh_duo;
-	byte fh_trio;
-	byte fhWinner;
-	byte flWinner;
-	byte tp_first;
-	byte tp_second;
-	byte tpWinner;
-	byte tkWinner;
-	byte tk;
-	byte op;
-	byte opWinner;
+	Byte fh_duo;
+	Byte fh_trio;
+	Byte fhWinner;
+	Byte flWinner;
+	Byte tp_first;
+	Byte tp_second;
+	Byte tpWinner;
+	Byte tkWinner;
+	Byte tk;
+	Byte op;
+	Byte opWinner;
 
 	public Game() {
 		cardsA = new Byte[5];
@@ -178,23 +181,7 @@ class Game {
 		int a = computeResult(PLAYER_1);
 		int b = computeResult(PLAYER_2);
 
-		if (a == 9 || b == 9) {
-			System.out.println("Royal Flush");
-		}
-		
-		if(sameColorA) {
-			for (int i = 0; i < 5; ++i) {
-				System.out.print(newCardsA[i].number + " ");
-			}
-			System.out.println("");
-		}
-		
-		if(sameColorB) {
-			for (int i = 0; i < 5; ++i) {
-				System.out.print(newCardsB[i].number + " ");
-			}
-			System.out.println("");
-		}
+		//System.out.println(a + " - " + b);
 
 		if (b > a)
 			return PLAYER_2;
@@ -224,7 +211,7 @@ class Game {
 				return opWinner;
 			case 0:
 				byte winner = PLAYER_2;
-				decideFromMax(PLAYER_1, winner);
+				winner = decideFromMax(PLAYER_1);
 				return winner;
 			}
 		} catch (Exception ex) {
@@ -235,9 +222,8 @@ class Game {
 
 	private int computeResult(byte player) {
 		Byte[] cardsInHand = player == 1 ? cardsA : cardsB;
-		Boolean sameColor = player == 1 ? sameColorA : sameColorB; 
+		Boolean sameColor = player == 1 ? sameColorA : sameColorB;
 		if (sameColor) {
-			System.out.println("Same color " + player);
 			if (cardsInHand[4] == 10) {
 				return 9;
 			}
@@ -262,14 +248,17 @@ class Game {
 		}
 		if (sameColor) {
 			if (flWinner != 0) {
-				decideFromMax(player, flWinner);
+				flWinner = decideFromMax(player);
 				return 5;
 			} else {
 				flWinner = player;
 			}
 			return 5;
 		}
-		if (cardsInHand[0] - cardsInHand[4] == 4) {
+		if (cardsInHand[0] - cardsInHand[4] == 4
+				&& cardsInHand[0] != cardsInHand[1]
+				&& cardsInHand[1] != cardsInHand[2]
+				&& cardsInHand[2] != cardsInHand[3]) {
 			return 4;
 		}
 		if (cardsInHand[0] == cardsInHand[2]
@@ -283,7 +272,7 @@ class Game {
 					return 3;
 				}
 				if (TK_TMP == tk) {
-					decideFromMax(player, tkWinner);
+					tkWinner = decideFromMax(player);
 					return 3;
 				}
 				if (TK_TMP < tk) {
@@ -317,7 +306,7 @@ class Game {
 					tpWinner = player;
 					return 2;
 				} else {
-					decideFromMax(player, tpWinner);
+					tpWinner = decideFromMax(player);
 					return 2;
 				}
 			}
@@ -325,6 +314,7 @@ class Game {
 		if (cardsInHand[0] == cardsInHand[1]
 				|| cardsInHand[1] == cardsInHand[2]) {
 			if (opWinner == 0) {
+				opWinner = player;
 				op = (byte) cardsInHand[1];
 				return 1;
 			} else {
@@ -334,7 +324,7 @@ class Game {
 					opWinner = player;
 					return 1;
 				} else {
-					decideFromMax(player, opWinner);
+					opWinner = decideFromMax(player);
 					return 1;
 				}
 			}
@@ -342,6 +332,7 @@ class Game {
 		if (cardsInHand[2] == cardsInHand[3]
 				|| cardsInHand[3] == cardsInHand[4]) {
 			if (opWinner == 0) {
+				opWinner = player;
 				op = (byte) cardsInHand[3];
 				return 1;
 			} else {
@@ -351,7 +342,7 @@ class Game {
 					opWinner = player;
 					return 1;
 				} else {
-					decideFromMax(player, opWinner);
+					opWinner = decideFromMax(player);
 					return 1;
 				}
 			}
@@ -360,16 +351,14 @@ class Game {
 		return 0;
 	}
 
-	private void decideFromMax(byte player, Object winner) {
+	private Byte decideFromMax(byte player) {
 		Byte[] cardsInHand = player == 1 ? cardsA : cardsB;
 		Byte[] otherPlayer = player == 1 ? cardsB : cardsA;
 		for (int i = 0; i < 5; ++i) {
 			if (cardsInHand[i] > otherPlayer[i]) {
-				winner = player;
-				return;
+				return player;
 			} else if (cardsInHand[i] < otherPlayer[i]) {
-				winner = player == PLAYER_1 ? PLAYER_2 : PLAYER_1;
-				return;
+				return player == PLAYER_1 ? PLAYER_2 : PLAYER_1;
 			}
 		}
 		throw new IllegalArgumentException("DRAWN");
@@ -377,12 +366,12 @@ class Game {
 
 	private void decideTrio(Byte[] cardsInHand, int i) {
 		if (fh_trio == 0) {
-			fh_trio = (byte) cardsInHand[i];
+			fh_trio = (byte) cardsInHand[2];
 			fh_duo = (byte) cardsInHand[4 - i];
 		} else {
-			if (fh_trio < (byte) cardsInHand[i]) {
+			if (fh_trio < (byte) cardsInHand[2]) {
 				fhWinner = PLAYER_2;
-			} else if (fh_trio > (byte) cardsInHand[i]) {
+			} else if (fh_trio > (byte) cardsInHand[2]) {
 				fhWinner = PLAYER_1;
 			} else {
 				if (fh_duo < (byte) cardsInHand[4 - i]) {
