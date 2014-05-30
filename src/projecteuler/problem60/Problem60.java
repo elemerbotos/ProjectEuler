@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import sun.security.util.BigInt;
+
 public class Problem60 {
 	
 	private ArrayList<BigInteger> primes;
 	private BigInteger boundaryForLookForPrimes;
-	private final static int MAX = 120000;
+	private static int MAX = 1200;
 	
 	public Problem60(){
 		primes = new ArrayList<BigInteger>();
@@ -17,16 +19,28 @@ public class Problem60 {
 		
 		primes.add(new BigInteger("3"));
 		primes.add(new BigInteger("7"));
-		primes.add(new BigInteger("109"));
-		primes.add(new BigInteger("673"));
+		primes.add(new BigInteger("11"));
+		primes.add(new BigInteger("13"));
 		System.out.println("Computing primes");
 		lookForPrimes();
 		System.out.println("Primes computed");
 	}
 	
 	public static void main(String[] args) {
+		
 		Problem60 primeSets = new Problem60();
-		primeSets.runNotFixedPrimes();
+		
+		while(primeSets.runNotFixedPrimes() == -1) {
+			MAX += 100;
+		}
+		
+		
+		/*
+		System.out.println(primeSets.bigIntSqrt(new BigInteger("9")));
+		System.out.println(primeSets.bigIntSqrt(new BigInteger("7")));
+		System.out.println(primeSets.bigIntSqrt(new BigInteger("12")));
+		System.out.println(primeSets.bigIntSqrt(new BigInteger("25")));
+		*/
 	}
 	
 	public int runNotFixedPrimes() {
@@ -36,29 +50,33 @@ public class Problem60 {
 		selectedPrimes[2] = primes.get(2);
 		selectedPrimes[3] = primes.get(3);
 		for(int a = 0 ; a < MAX-4 ; ++a) {
-			boolean gotIt = true;
 			selectedPrimes[0] = primes.get(a);
-			for(int b = a+1 ; b < MAX-3 && b != a && gotIt; ++b) {
+			for(int b = a+1 ; b < MAX-3 && b != a; ++b) {
+				boolean gotIt1 = true;
 				selectedPrimes[1] = primes.get(b);
-				gotIt &= check(selectedPrimes[0], selectedPrimes[1]);
-				for(int c = b+1 ; c < MAX-2 && c != b && c != a && gotIt; ++c) {
+				gotIt1 &= check(selectedPrimes[0], selectedPrimes[1]);
+				for(int c = b+1 ; c < MAX-2 && c != b && c != a && gotIt1; ++c) {
+					boolean gotIt2 = true;
 					selectedPrimes[2] = primes.get(c);
-					gotIt &= check(selectedPrimes[0], selectedPrimes[2]);
-					gotIt &= check(selectedPrimes[1], selectedPrimes[2]);
+					gotIt2 &= check(selectedPrimes[0], selectedPrimes[2]);
+					gotIt2 &= check(selectedPrimes[1], selectedPrimes[2]);
 					System.out.println(selectedPrimes[0].toString() + " " + selectedPrimes[1].toString() + " " 
 							+ selectedPrimes[2].toString());
-					for(int d = c + 1 ; d < MAX-1 && d != c && d != b && d != a && gotIt; ++d) {
+					for(int d = c + 1 ; d < MAX-1 && d != c && d != b && d != a && gotIt2; ++d) {
+						boolean gotIt3 = true;
 						selectedPrimes[3] = primes.get(d);
-						gotIt &= check(selectedPrimes[0], selectedPrimes[3]);
-						gotIt &= check(selectedPrimes[1], selectedPrimes[3]);
-						gotIt &= check(selectedPrimes[2], selectedPrimes[3]);
+						gotIt3 &= check(selectedPrimes[0], selectedPrimes[3]);
+						gotIt3 &= check(selectedPrimes[1], selectedPrimes[3]);
+						gotIt3 &= check(selectedPrimes[2], selectedPrimes[3]);
 						System.out.println(selectedPrimes[0].toString() + " " + selectedPrimes[1].toString() + " " 
 											+ selectedPrimes[2].toString() + " " + selectedPrimes[3].toString());
-						for(int e = d + 1 ; e < MAX && e != d && e != c && e != b && e != a && gotIt; ++e) {
+						for(int e = d + 1 ; e < MAX && e != d && e != c && e != b && e != a && gotIt3; ++e) {
 							//System.out.println(e);
 							selectedPrimes[4] = primes.get(e);
 							if(checkSet(selectedPrimes)) {
-								System.out.println("megvan");
+								BigInteger answer = selectedPrimes[0].add(selectedPrimes[1].add(selectedPrimes[2].add(selectedPrimes[3].add(selectedPrimes[4]))));
+								System.out.println(answer);
+								return 2;
 							}
 						}
 					}
@@ -161,7 +179,7 @@ public class Problem60 {
 
 	private boolean isPrime(BigInteger num) {
 		BigInteger sqr = bigIntSqrt(num);
-		for (BigInteger i = new BigInteger("2"); i.compareTo(sqr) < 0; 
+		for (BigInteger i = new BigInteger("2"); i.compareTo(sqr) <= 0; 
 				i = i.add(BigInteger.ONE)) {
 			//System.out.println(i.toString());
 			if(num.mod(i).equals(BigInteger.ZERO)) {
